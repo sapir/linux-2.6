@@ -52,7 +52,7 @@ int nilfs_atime_read(struct super_block *sb, struct nilfs_inode *raw_inode,
 	int err;
 	struct inode *atime_ino;
 
-	atime_ino = nilfs_iget_locked(sb, NULL, NILFS_CPFILE_INO);
+	atime_ino = nilfs_iget_locked(sb, NULL, NILFS_ATIME_INO);
 	if (unlikely(!atime_ino))
 		return -ENOMEM;
 	if (!(atime_ino->i_state & I_NEW))
