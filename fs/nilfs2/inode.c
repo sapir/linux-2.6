@@ -33,6 +33,7 @@
 #include "mdt.h"
 #include "cpfile.h"
 #include "ifile.h"
+#include "atime.h"
 
 struct nilfs_iget_args {
 	u64 ino;
@@ -398,12 +399,11 @@ int nilfs_read_inode_common(struct inode *inode,
 	inode->i_gid = (gid_t)le32_to_cpu(raw_inode->i_gid);
 	inode->i_nlink = le16_to_cpu(raw_inode->i_links_count);
 	inode->i_size = le64_to_cpu(raw_inode->i_size);
-	inode->i_atime.tv_sec = le64_to_cpu(raw_inode->i_mtime);
 	inode->i_ctime.tv_sec = le64_to_cpu(raw_inode->i_ctime);
 	inode->i_mtime.tv_sec = le64_to_cpu(raw_inode->i_mtime);
-	inode->i_atime.tv_nsec = le32_to_cpu(raw_inode->i_mtime_nsec);
 	inode->i_ctime.tv_nsec = le32_to_cpu(raw_inode->i_ctime_nsec);
 	inode->i_mtime.tv_nsec = le32_to_cpu(raw_inode->i_mtime_nsec);
+	nilfs_atime_fill_inode(inode);
 	if (inode->i_nlink == 0 && inode->i_mode == 0)
 		return -EINVAL; /* this inode is deleted */
 
@@ -591,6 +591,7 @@ void nilfs_write_inode_common(struct inode *inode,
 	raw_inode->i_mtime = cpu_to_le64(inode->i_mtime.tv_sec);
 	raw_inode->i_ctime_nsec = cpu_to_le32(inode->i_ctime.tv_nsec);
 	raw_inode->i_mtime_nsec = cpu_to_le32(inode->i_mtime.tv_nsec);
+	nilfs_atime_update_table(inode);
 	raw_inode->i_blocks = cpu_to_le64(inode->i_blocks);
 
 	raw_inode->i_flags = cpu_to_le32(ii->i_flags);
