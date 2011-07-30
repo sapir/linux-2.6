@@ -152,6 +152,7 @@ struct the_nilfs {
 	struct inode	       *ns_dat;
 	struct inode	       *ns_cpfile;
 	struct inode	       *ns_sufile;
+	struct inode	       *ns_atimefile;
 
 	/* Checkpoint tree */
 	struct rb_root		ns_cptree;

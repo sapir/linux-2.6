@@ -90,6 +90,7 @@ struct nilfs_inode {
  * @sr_dat: DAT file inode
  * @sr_cpfile: checkpoint file inode
  * @sr_sufile: segment usage file inode
+ * @sr_atimefile: atime file inode
  */
 struct nilfs_super_root {
 	__le32 sr_sum;
@@ -99,6 +100,7 @@ struct nilfs_super_root {
 	struct nilfs_inode sr_dat;
 	struct nilfs_inode sr_cpfile;
 	struct nilfs_inode sr_sufile;
+	struct nilfs_inode sr_atimefile;
 };
 
 #define NILFS_SR_MDT_OFFSET(inode_size, i)  \
@@ -107,7 +109,8 @@ struct nilfs_super_root {
 #define NILFS_SR_DAT_OFFSET(inode_size)     NILFS_SR_MDT_OFFSET(inode_size, 0)
 #define NILFS_SR_CPFILE_OFFSET(inode_size)  NILFS_SR_MDT_OFFSET(inode_size, 1)
 #define NILFS_SR_SUFILE_OFFSET(inode_size)  NILFS_SR_MDT_OFFSET(inode_size, 2)
-#define NILFS_SR_BYTES(inode_size)	    NILFS_SR_MDT_OFFSET(inode_size, 3)
+#define NILFS_SR_ATIMEFL_OFFSET(inode_size) NILFS_SR_MDT_OFFSET(inode_size, 3)
+#define NILFS_SR_BYTES(inode_size)	    NILFS_SR_MDT_OFFSET(inode_size, 4)
 
 /*
  * Maximal mount counts

@@ -32,6 +32,7 @@
 #include "alloc.h"
 #include "cpfile.h"
 #include "sufile.h"
+#include "atime.h"
 #include "dat.h"
 #include "segbuf.h"
 
@@ -140,6 +141,11 @@ static int nilfs_load_super_root(struct the_nilfs *nilfs,
 				&nilfs->ns_sufile);
 	if (err)
 		goto failed_cpfile;
+	
+	rawi = (void *)bh_sr->b_data + NILFS_SR_ATIMEFL_OFFSET(inode_size);
+	err = nilfs_atime_read(sb, rawi, &nilfs->ns_atimefile);
+	if (err)
+		goto failed_atimefile;
 
 	raw_sr = (struct nilfs_super_root *)bh_sr->b_data;
 	nilfs->ns_nongc_ctime = le64_to_cpu(raw_sr->sr_nongc_ctime);
@@ -147,6 +153,9 @@ static int nilfs_load_super_root(struct the_nilfs *nilfs,
  failed:
 	brelse(bh_sr);
 	return err;
+
+ failed_atimefile:
+	iput(nilfs->ns_atimefile);
 
  failed_cpfile:
 	iput(nilfs->ns_cpfile);
@@ -342,6 +351,7 @@ int load_nilfs(struct the_nilfs *nilfs, struct super_block *sb)
 	goto failed;
 
  failed_unload:
+	iput(nilfs->ns_atimefile);
 	iput(nilfs->ns_cpfile);
 	iput(nilfs->ns_sufile);
 	iput(nilfs->ns_dat);
