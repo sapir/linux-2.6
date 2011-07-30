@@ -29,6 +29,17 @@
 #include "nilfs.h"
 
 
+void nilfs_atime_fill_inode(struct inode *inode)
+{
+	/* XXX stub */
+	inode->i_atime = inode->i_mtime;
+}
+
+void nilfs_atime_update_table(struct inode *inode)
+{
+	/* XXX stub */
+}
+
 /**
  * nilfs_atime_read - read or get atime node
  * @sb: super block instance
