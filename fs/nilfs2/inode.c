@@ -743,6 +743,9 @@ void nilfs_evict_inode(struct inode *inode)
 
 	if (inode->i_data.nrpages)
 		truncate_inode_pages(&inode->i_data, 0);
+	
+	/* TODO: is this the right time to do this? */
+	nilfs_atime_delete(inode);
 
 	/* TODO: some of the following operations may fail.  */
 	nilfs_truncate_bmap(ii, 0);
