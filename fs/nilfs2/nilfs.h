@@ -203,8 +203,6 @@ static inline int nilfs_init_acl(struct inode *inode, struct inode *dir)
 }
 #endif
 
-#define NILFS_ATIME_DISABLE
-
 /* Flags that should be inherited by new inodes from their parent. */
 #define NILFS_FL_INHERITED						\
 	(FS_SECRM_FL | FS_UNRM_FL | FS_COMPR_FL | FS_SYNC_FL |		\
