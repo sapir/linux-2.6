@@ -146,7 +146,7 @@ static int nilfs_load_super_root(struct the_nilfs *nilfs,
     nilfs->ns_atimefile = NULL; /* set to NULL to avoid a race in nilfs_read_inode_common */
 	err = nilfs_atime_read(sb, rawi, &nilfs->ns_atimefile);
 	if (err)
-		goto failed_atimefile;
+		goto failed_sufile;
 
 	raw_sr = (struct nilfs_super_root *)bh_sr->b_data;
 	nilfs->ns_nongc_ctime = le64_to_cpu(raw_sr->sr_nongc_ctime);
@@ -155,8 +155,8 @@ static int nilfs_load_super_root(struct the_nilfs *nilfs,
 	brelse(bh_sr);
 	return err;
 
- failed_atimefile:
-	iput(nilfs->ns_atimefile);
+ failed_sufile:
+	iput(nilfs->ns_sufile);
 
  failed_cpfile:
 	iput(nilfs->ns_cpfile);
@@ -224,6 +224,8 @@ int load_nilfs(struct the_nilfs *nilfs, struct super_block *sb)
 	int really_read_only = bdev_read_only(nilfs->ns_bdev);
 	int valid_fs = nilfs_valid_fs(nilfs);
 	int err;
+
+    printk(KERN_INFO "NILFS: mounting with atime enhancement\n");
 
 	if (!valid_fs) {
 		printk(KERN_WARNING "NILFS warning: mounting unchecked fs\n");
