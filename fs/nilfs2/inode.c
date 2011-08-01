@@ -384,6 +384,7 @@ void nilfs_set_inode_flags(struct inode *inode)
 		inode->i_flags |= S_NOATIME;
 	if (flags & FS_DIRSYNC_FL)
 		inode->i_flags |= S_DIRSYNC;
+
 	mapping_set_gfp_mask(inode->i_mapping,
 			     mapping_gfp_mask(inode->i_mapping) & ~__GFP_FS);
 }
@@ -736,6 +737,8 @@ void nilfs_evict_inode(struct inode *inode)
 	struct the_nilfs *nilfs = sb->s_fs_info;
 	struct nilfs_inode_info *ii = NILFS_I(inode);
 	int ret;
+
+	printk(KERN_INFO "evicting inode %lu", inode->i_ino);
 
 	if (inode->i_nlink || !ii->i_root || unlikely(is_bad_inode(inode))) {
 		if (inode->i_data.nrpages)

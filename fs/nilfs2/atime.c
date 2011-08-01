@@ -149,6 +149,8 @@ int nilfs_atime_fill_inode(struct inode * atimefile, struct inode * inode)
     struct buffer_head * block_bh;
     struct timespec * atime;
 
+    printk(KERN_INFO "filling in %lu: %lu", inode->i_ino, inode->i_atime.tv_sec);
+
     if ((NULL == atimefile) || (atimefile == inode)) {
         inode->i_atime = inode->i_mtime;
         return 0;
@@ -177,6 +179,8 @@ int nilfs_atime_update_from_inode(struct inode * atimefile, struct inode * inode
     struct nilfs_atime_block * atime_block;
     struct buffer_head * block_bh;
     struct timespec * atime;
+
+    printk(KERN_INFO "updating from %lu: %lu", inode->i_ino, inode->i_atime.tv_sec);
 
     err = nilfs_atime_get_block(atimefile, inode->i_ino, &atime_block, &block_bh);
     if (err < 0) {
@@ -230,24 +234,33 @@ int nilfs_atime_read(struct super_block *sb,
 		return -ENOMEM;
 	if (!(atimefile->i_state & I_NEW))
 		goto out;
+	
+	printk(KERN_INFO "before mdt init");
 
 	err = nilfs_mdt_init(atimefile, NILFS_MDT_GFP, 0);
 	if (err)
 		goto failed;
 
+	printk(KERN_INFO "before set entry size");
+
 	nilfs_mdt_set_entry_size(atimefile,
                              sizeof(struct nilfs_atime_block),
                              sizeof(struct nilfs_atime_block_header));
+
+	printk(KERN_INFO "before read inode common");
 
 	err = nilfs_read_inode_common(atimefile, raw_inode);
 	if (err)
 		goto failed;
 
+	printk(KERN_INFO "before unlock");
 	unlock_new_inode(atimefile);
  out:
+	printk(KERN_INFO "out");
 	*inodep = atimefile;
 	return 0;
  failed:
+	printk(KERN_INFO "failed");
 	iget_failed(atimefile);
 	return err;
 }

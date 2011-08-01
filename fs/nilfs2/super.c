@@ -480,6 +480,8 @@ static void nilfs_put_super(struct super_block *sb)
 {
 	struct the_nilfs *nilfs = sb->s_fs_info;
 
+	printk(KERN_INFO "put_super");
+
 	nilfs_detach_log_writer(sb);
 
 	if (!(sb->s_flags & MS_RDONLY)) {

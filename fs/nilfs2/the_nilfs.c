@@ -156,6 +156,7 @@ static int nilfs_load_super_root(struct the_nilfs *nilfs,
 	return err;
 
  failed_sufile:
+	printk(KERN_INFO "err %d", err);
 	iput(nilfs->ns_sufile);
 
  failed_cpfile:
