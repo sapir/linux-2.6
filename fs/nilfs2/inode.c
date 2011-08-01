@@ -392,6 +392,7 @@ int nilfs_read_inode_common(struct inode *inode,
 			    struct nilfs_inode *raw_inode)
 {
 	struct nilfs_inode_info *ii = NILFS_I(inode);
+	struct the_nilfs *nilfs = inode->i_sb->s_fs_info;
 	int err;
 
 	inode->i_mode = le16_to_cpu(raw_inode->i_mode);
@@ -403,7 +404,9 @@ int nilfs_read_inode_common(struct inode *inode,
 	inode->i_mtime.tv_sec = le64_to_cpu(raw_inode->i_mtime);
 	inode->i_ctime.tv_nsec = le32_to_cpu(raw_inode->i_ctime_nsec);
 	inode->i_mtime.tv_nsec = le32_to_cpu(raw_inode->i_mtime_nsec);
-	nilfs_atime_fill_inode(inode);
+	err = nilfs_atime_fill_inode(nilfs->ns_atimefile, inode);
+    if (err < 0)
+        return err;
 	if (inode->i_nlink == 0 && inode->i_mode == 0)
 		return -EINVAL; /* this inode is deleted */
 
@@ -581,6 +584,7 @@ void nilfs_write_inode_common(struct inode *inode,
 			      struct nilfs_inode *raw_inode, int has_bmap)
 {
 	struct nilfs_inode_info *ii = NILFS_I(inode);
+	struct the_nilfs *nilfs = inode->i_sb->s_fs_info;
 
 	raw_inode->i_mode = cpu_to_le16(inode->i_mode);
 	raw_inode->i_uid = cpu_to_le32(inode->i_uid);
@@ -591,7 +595,7 @@ void nilfs_write_inode_common(struct inode *inode,
 	raw_inode->i_mtime = cpu_to_le64(inode->i_mtime.tv_sec);
 	raw_inode->i_ctime_nsec = cpu_to_le32(inode->i_ctime.tv_nsec);
 	raw_inode->i_mtime_nsec = cpu_to_le32(inode->i_mtime.tv_nsec);
-	nilfs_atime_update_table(inode);
+    (void)nilfs_atime_update_from_inode(nilfs->ns_atimefile, inode);
 	raw_inode->i_blocks = cpu_to_le64(inode->i_blocks);
 
 	raw_inode->i_flags = cpu_to_le32(ii->i_flags);
@@ -729,6 +733,7 @@ void nilfs_evict_inode(struct inode *inode)
 {
 	struct nilfs_transaction_info ti;
 	struct super_block *sb = inode->i_sb;
+	struct the_nilfs *nilfs = sb->s_fs_info;
 	struct nilfs_inode_info *ii = NILFS_I(inode);
 	int ret;
 
@@ -744,11 +749,9 @@ void nilfs_evict_inode(struct inode *inode)
 	if (inode->i_data.nrpages)
 		truncate_inode_pages(&inode->i_data, 0);
 	
-	/* TODO: is this the right time to do this? */
-	nilfs_atime_delete(inode);
-
 	/* TODO: some of the following operations may fail.  */
 	nilfs_truncate_bmap(ii, 0);
+    nilfs_atime_delete_inode_entry(nilfs->ns_atimefile, inode);
 	nilfs_mark_inode_dirty(inode);
 	end_writeback(inode);
 

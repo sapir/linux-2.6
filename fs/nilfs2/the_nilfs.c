@@ -143,6 +143,7 @@ static int nilfs_load_super_root(struct the_nilfs *nilfs,
 		goto failed_cpfile;
 	
 	rawi = (void *)bh_sr->b_data + NILFS_SR_ATIMEFL_OFFSET(inode_size);
+    nilfs->ns_atimefile = NULL; /* set to NULL to avoid a race in nilfs_read_inode_common */
 	err = nilfs_atime_read(sb, rawi, &nilfs->ns_atimefile);
 	if (err)
 		goto failed_atimefile;

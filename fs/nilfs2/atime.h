@@ -28,11 +28,12 @@
 #include <linux/nilfs2_fs.h>
 
 
-void nilfs_atime_fill_inode(struct inode *inode);
+int nilfs_atime_fill_inode        (struct inode * atimefile, struct inode *inode);
+int nilfs_atime_update_from_inode (struct inode * atimefile, struct inode *inode);
+int nilfs_atime_delete_inode_entry(struct inode * atimefile, struct inode *inode);
 
-void nilfs_atime_update_table(struct inode *inode);
-
-int nilfs_atime_read(struct super_block *sb, struct nilfs_inode *raw_inode,
-		     struct inode **inodep);
+int nilfs_atime_read(struct super_block *sb, 
+                     struct nilfs_inode *raw_inode,
+                     struct inode **inodep);
 
 #endif	/* _NILFS_ATIME_H */
