@@ -753,6 +753,8 @@ static int nilfs_test_metadata_dirty(struct the_nilfs *nilfs,
 		ret++;
 	if (nilfs_mdt_fetch_dirty(nilfs->ns_sufile))
 		ret++;
+    if (nilfs_mdt_fetch_dirty(nilfs->ns_atimefile))
+        ret++;
 	if ((ret || nilfs_doing_gc()) && nilfs_mdt_fetch_dirty(nilfs->ns_dat))
 		ret++;
 	return ret;
@@ -788,6 +790,7 @@ static void nilfs_segctor_clear_metadata_dirty(struct nilfs_sc_info *sci)
 
 	nilfs_mdt_clear_dirty(sci->sc_root->ifile);
 	nilfs_mdt_clear_dirty(nilfs->ns_cpfile);
+    nilfs_mdt_clear_dirty(nilfs->ns_atimefile);
 	nilfs_mdt_clear_dirty(nilfs->ns_sufile);
 	nilfs_mdt_clear_dirty(nilfs->ns_dat);
 }
@@ -905,6 +908,8 @@ static void nilfs_segctor_fill_in_super_root(struct nilfs_sc_info *sci,
 				 NILFS_SR_CPFILE_OFFSET(isz), 1);
 	nilfs_write_inode_common(nilfs->ns_sufile, (void *)raw_sr +
 				 NILFS_SR_SUFILE_OFFSET(isz), 1);
+    nilfs_write_inode_common(nilfs->ns_atimefile, (void *)raw_sr +
+                 NILFS_SR_ATIMEFL_OFFSET(isz), 1);
 	memset((void *)raw_sr + srsz, 0, nilfs->ns_blocksize - srsz);
 }
 

@@ -408,8 +408,10 @@ int nilfs_read_inode_common(struct inode *inode,
 	err = nilfs_atime_fill_inode(nilfs->ns_atimefile, inode);
     if (err < 0)
         return err;
-	if (inode->i_nlink == 0 && inode->i_mode == 0)
+	if (inode->i_nlink == 0 && inode->i_mode == 0) {
+        printk(KERN_WARNING "inode->i_ino=%lu is deleted\n", inode->i_ino);
 		return -EINVAL; /* this inode is deleted */
+    }
 
 	inode->i_blocks = le64_to_cpu(raw_inode->i_blocks);
 	ii->i_flags = le32_to_cpu(raw_inode->i_flags);
@@ -587,7 +589,10 @@ void nilfs_write_inode_common(struct inode *inode,
 	struct nilfs_inode_info *ii = NILFS_I(inode);
 	struct the_nilfs *nilfs = inode->i_sb->s_fs_info;
 
-	raw_inode->i_mode = cpu_to_le16(inode->i_mode);
+    printk(KERN_INFO "In nilfs_write_inode_common(), inode->i_ino=%lu, inode->i_nlink=%d",
+           inode->i_ino, inode->i_nlink);
+
+    raw_inode->i_mode = cpu_to_le16(inode->i_mode);
 	raw_inode->i_uid = cpu_to_le32(inode->i_uid);
 	raw_inode->i_gid = cpu_to_le32(inode->i_gid);
 	raw_inode->i_links_count = cpu_to_le16(inode->i_nlink);
