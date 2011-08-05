@@ -69,6 +69,7 @@ enum {
 	NILFS_ST_FILE,
 	NILFS_ST_IFILE,
 	NILFS_ST_CPFILE,
+    NILFS_ST_ATIMEFL,
 	NILFS_ST_SUFILE,
 	NILFS_ST_DAT,
 	NILFS_ST_SR,		/* Super root */
@@ -1142,6 +1143,12 @@ static int nilfs_segctor_collect_blocks(struct nilfs_sc_info *sci, int mode)
 		if (unlikely(err))
 			break;
 		sci->sc_stage.scnt++;  /* Fall through */
+    case NILFS_ST_ATIMEFL:
+        err = nilfs_segctor_scan_file(sci, nilfs->ns_atimefile,
+                                      &nilfs_sc_file_ops);
+        if (unlikely(err))
+            break;
+        sci->sc_stage.scnt++;  /* Fall through */
 	case NILFS_ST_SUFILE:
 		err = nilfs_sufile_freev(nilfs->ns_sufile, sci->sc_freesegs,
 					 sci->sc_nfreesegs, &ndone);
