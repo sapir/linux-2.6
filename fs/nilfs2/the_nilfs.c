@@ -156,7 +156,6 @@ static int nilfs_load_super_root(struct the_nilfs *nilfs,
 	return err;
 
  failed_sufile:
-	printk(KERN_INFO "err %d", err);
 	iput(nilfs->ns_sufile);
 
  failed_cpfile:
@@ -225,8 +224,6 @@ int load_nilfs(struct the_nilfs *nilfs, struct super_block *sb)
 	int really_read_only = bdev_read_only(nilfs->ns_bdev);
 	int valid_fs = nilfs_valid_fs(nilfs);
 	int err;
-
-    printk(KERN_INFO "NILFS: mounting with atime enhancement\n");
 
 	if (!valid_fs) {
 		printk(KERN_WARNING "NILFS warning: mounting unchecked fs\n");

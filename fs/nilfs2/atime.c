@@ -149,24 +149,18 @@ int nilfs_atime_fill_inode(struct inode * atimefile, struct inode * inode)
     struct buffer_head * block_bh;
     struct timespec * atime;
 
-    printk(KERN_INFO "%s(atimefile=%016lx, inode->i_ino=%lu)\n", __FUNCTION__, (unsigned long int)atimefile, inode->i_ino);
-
     if ((NULL == atimefile) || (atimefile == inode)) {
-        printk(KERN_INFO "  atimefile=%016lx inode=%016lx, quitting\n", (unsigned long int)atimefile, (unsigned long int)inode);
         inode->i_atime = inode->i_mtime;
-        printk(KERN_INFO "%s() -> 0\n", __FUNCTION__);
         return 0;
     }
 
     err = nilfs_atime_get_block(atimefile, inode->i_ino, &atime_block, &block_bh);
     if (err < 0) {
-        printk(KERN_INFO "%s() -> %d\n", __FUNCTION__, err);
         return err;
     }
 
     atime = nilfs_atime_get_entry_in_block(atime_block, inode->i_ino);
     if ((0 == atime->tv_sec) && (0 == atime->tv_nsec)) {
-        printk(KERN_INFO "  time is invalid, settings to mtime\n");
         /* time is invalid, set to valid time and increase count */
         *atime = inode->i_mtime;
         ++atime_block->header.count;
@@ -174,7 +168,6 @@ int nilfs_atime_fill_inode(struct inode * atimefile, struct inode * inode)
 
     inode->i_atime = *atime;
     nilfs_atime_put_block(block_bh);
-    printk(KERN_INFO "%s() -> 0\n", __FUNCTION__);
     return 0;
 }
 
@@ -185,21 +178,15 @@ int nilfs_atime_update_from_inode(struct inode * atimefile, struct inode * inode
     struct buffer_head * block_bh;
     struct timespec * atime;
 
-    printk(KERN_INFO "%s(atimefile=%016lx, inode->i_ino=%lu)\n", __FUNCTION__, (unsigned long int)atimefile, inode->i_ino);
-
     err = nilfs_atime_get_block(atimefile, inode->i_ino, &atime_block, &block_bh);
     if (err < 0) {
-        printk(KERN_INFO "%s() -> %d\n", __FUNCTION__, err);
         return err;
     }
 
     atime = nilfs_atime_get_entry_in_block(atime_block, inode->i_ino);
     *atime = inode->i_atime;
 
-    printk(KERN_INFO "  atime updated to %lu.%ld\n", atime->tv_sec, atime->tv_nsec);
-
     nilfs_atime_put_block(block_bh);
-    printk(KERN_INFO "%s() -> 0\n", __FUNCTION__);
     return 0;
 }
 
@@ -238,40 +225,28 @@ int nilfs_atime_read(struct super_block *sb,
 	struct inode *atimefile;
 	int err;
 
-    printk(KERN_INFO "%s(sb=%016lx, raw_inode=%016lx)", __FUNCTION__, (unsigned long int)sb, (unsigned long int)raw_inode);
-
     atimefile = nilfs_iget_locked(sb, NULL, NILFS_ATIME_INO);
 	if (unlikely(!atimefile))
 		return -ENOMEM;
 	if (!(atimefile->i_state & I_NEW))
 		goto out;
 	
-	printk(KERN_INFO "  calling nilfs_mdt_init()");
-
 	err = nilfs_mdt_init(atimefile, NILFS_MDT_GFP, 0);
 	if (err)
 		goto failed;
-
-	printk(KERN_INFO "  calling nilfs_mdt_set_entry_size()");
 
 	nilfs_mdt_set_entry_size(atimefile,
                              sizeof(struct nilfs_atime_block),
                              sizeof(struct nilfs_atime_block_header));
 
-	printk(KERN_INFO "  calling nilfs_read_inode_common()");
-
 	err = nilfs_read_inode_common(atimefile, raw_inode);
 	if (err)
 		goto failed;
 
-	printk(KERN_INFO "  calling unlock_new_inode()");
-	unlock_new_inode(atimefile);
  out:
     *inodep = atimefile;
-    printk(KERN_INFO "%s() -> 0\n", __FUNCTION__);
 	return 0;
  failed:
     iget_failed(atimefile);
-    printk(KERN_INFO "%s() -> %d\n", __FUNCTION__, err);
 	return err;
 }
